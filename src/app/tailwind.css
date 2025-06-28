@@ -1,0 +1,21 @@
+@theme{
+  --color-primary: #EE2B69;
+  --color-primary-100: #FFE8F0;
+  --color-secondary: #FBE843;
+  --color-black: #000000;
+  --color-black-100: #333333;
+  --color-black-200: #141413;
+  --color-black-300:"#7D8087";
+  --color-white: #FFFFFF;
+  --color-white-100: #F7F7F7;
+
+  --font-work-sans: var(--font-work-sans);
+
+  --border-radius-lg:var(--radius);
+  --border-radius-md:calc(var(--radius) - 2px);
+  --border-radius-sm:calc(var(--radius) - 4px);
+
+  --shadow-100:2px 2px 0px 0px rgb(0,0,0);
+  --shadow-200:2px 2px 0px 2px rgb(0,0,0);
+  --shadow-300:2px 2px 0px 2px rgb(238,43,105);
+}
