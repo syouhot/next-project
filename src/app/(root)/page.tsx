@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const posts = [{
     _createAt: new Date(),
     views: 55,
-    author: { _id: 1 },
+    author: { _id: 1 ,name:"adriano"},
     _id: 1,
     description: "this is a description",
     image:"",
