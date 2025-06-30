@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { formSchema } from '@/lib/validation';
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
+import { createPitch } from '@/lib/action';
 
 export default function StartupForm() {
     // 表单不重制问题
@@ -18,7 +19,7 @@ export default function StartupForm() {
     const [pitch, setPitch] = useState("")
     const router = useRouter()
 
-    const handleFormSubmit = async (prevState: any, formData: FormData) => {
+    const handleFormSubmit = async (prevState: { error: string, payLoad: FormData }, formData: FormData) => {
         try {
             const formValues = {
                 title: formData.get('title') as string,
@@ -27,60 +28,67 @@ export default function StartupForm() {
                 link: formData.get('link') as string,
                 pitch,
             }
-            await formSchema.parseAsync(formValues)
-            console.log(formValues);
+           await formSchema.parseAsync(formValues)
 
-            // const result = await createIdea(prevState,formValues,pitch)
+            // return result ? null : { ...prevState, error: "valication error", status: "ERROR", payLoad: formData }
 
-            // if (result.status=="SUCCESS") {
-            //     toast.success('success',{
-            //       description:"successfully submitted your startup"
-            //   }) 
-            //   router.push(`/startup/${result._id}`)
-            // }
-            // return result;
+            const result = await createPitch(prevState,formData,pitch)
+
+            if (result.status=="SUCCESS") {
+                toast.success('success',{
+                  description:"successfully submitted your startup"
+              }) 
+              router.push(`/startup/${result._id}`)
+            }
+            return result;
         } catch (e) {
             if (e instanceof z.ZodError) {
                 const fieldErrors = e.flatten().fieldErrors;
                 setError(fieldErrors as unknown as Record<string, string>);
-                toast.error('Error',{
-                    description:"please check your input and try again"
+                toast.error('Error', {
+                    ...prevState,
+                    description: "please check your input and try again",
                 })
-                return { ...prevState, error: "valication error", status: "ERROR" }
+                return { ...prevState, error: "valication error", status: "ERROR", payLoad: formData }
             }
-            toast.error('Error',{
-                description:"an unexpected error occurred"
+            toast.error('Error', {
+                description: "an unexpected error occurred"
             })
-            return { ...prevState, error: "an unexpected error occurred", status: "ERROR" }
+            return { ...prevState, error: "an unexpected error occurred", status: "ERROR", payLoad: formData }
         } finally {
 
         }
     }
     const [state, formAction, isPending] = useActionState(handleFormSubmit, { error: "", status: "INITIAL" })
+    const getFormValue = (key: string) => {
+        const value = state?.payLoad?.get(key)
+        return typeof value === "string" ? value : "";
+
+    }
     return (
         <form action={formAction} className='startup-form'>
 
             <div>
                 <label htmlFor="title" className='startup-form_label'>Title</label>
-                <Input type="text" name='title' id='title' className='startup-form_input' required placeholder='startup title' />
+                <Input type="text" name='title' id='title' className='startup-form_input' defaultValue={getFormValue("title")} required placeholder='startup title' />
                 {error.title && <p className='startup-form_error'>{error.title}</p>}
             </div>
 
             <div>
                 <label htmlFor="description" className='startup-form_label'>description</label>
-                <Textarea name='description' id='description' className='startup-form_textarea' required placeholder='startup description' />
+                <Textarea name='description' id='description' className='startup-form_textarea' defaultValue={getFormValue("description")} required placeholder='startup description' />
                 {error.description && <p className='startup-form_error'>{error.description}</p>}
             </div>
 
             <div>
                 <label htmlFor="category" className='startup-form_label'>category</label>
-                <Input type="text" name='category' id='category' className='startup-form_input' required placeholder='startup category(tech,health,education...)' />
+                <Input type="text" name='category' id='category' className='startup-form_input' defaultValue={getFormValue("category")} required placeholder='startup category(tech,health,education...)' />
                 {error.category && <p className='startup-form_error'>{error.category}</p>}
             </div>
 
             <div>
                 <label htmlFor="link" className='startup-form_label'>image url</label>
-                <Input type="text" name='link' id='link' className='startup-form_input' required placeholder='startup image url' />
+                <Input type="text" name='link' id='link' className='startup-form_input' defaultValue={getFormValue("link")} required placeholder='startup image url' />
                 {error.link && <p className='startup-form_error'>{error.link}</p>}
             </div>
 
